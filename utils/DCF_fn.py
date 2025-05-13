@@ -1,10 +1,11 @@
 import numpy as np
 
-def compute_op_bayes_decisions(pi, C_fn, C_fp, llr_vec):
-    num = pi * C_fn
-    den = (1-pi)*C_fp
-    #t = -np.log(num/den)
-    t = 0
+def compute_op_bayes_decisions(pi, C_fn, C_fp, llr_vec, t = None):
+    
+    if t == None:
+        num = pi * C_fn
+        den = (1-pi)*C_fp
+        t = -np.log(num/den)
     
     pred_vec = []
     
@@ -15,8 +16,8 @@ def compute_op_bayes_decisions(pi, C_fn, C_fp, llr_vec):
             pred_vec.append(0)
     return pred_vec
 
-def compute_DCF_u(pi, C_fn, C_fp, llr, L):
-    pred_vec = compute_op_bayes_decisions(pi, C_fn, C_fp, llr)
+def compute_DCF_u(pi, C_fn, C_fp, llr, L, t):
+    pred_vec = compute_op_bayes_decisions(pi, C_fn, C_fp, llr, t)
     conf_matrix = np.zeros((2,2), dtype = np.int16)
     # 'k' and 'm' are respectively the row and the column where the counter should be updated
     for i in range(len(pred_vec)):
@@ -40,8 +41,8 @@ def compute_DCF_u(pi, C_fn, C_fp, llr, L):
 
 
 # normalized DCF
-def compute_den_normalized_DCF(pi, C_fn, C_fp, llr, L):
-    pred_vec = compute_op_bayes_decisions(pi, C_fn, C_fp, llr)
+def compute_den_normalized_DCF(pi, C_fn, C_fp, llr, L, t):
+    pred_vec = compute_op_bayes_decisions(pi, C_fn, C_fp, llr, t)
     conf_matrix = np.zeros((2,2), dtype = np.int16)
     # 'k' and 'm' are respectively the row and the column where the counter should be updated
     for i in range(len(pred_vec)):
@@ -87,7 +88,7 @@ def compute_DCF(pi, C_fn, C_fp, llr_vec, L, t):
     P_fp = FP/(FP + TN)
     
     DCF_u = pi*C_fn*P_fn + (1-pi)*C_fp*P_fp
-    DCF_den = compute_den_normalized_DCF(pi, C_fn, C_fp, llr_vec, L)
+    DCF_den = compute_den_normalized_DCF(pi, C_fn, C_fp, llr_vec, L, t)
     DCF = DCF_u/DCF_den
     DCF = float(int(DCF*1000))/1000
     return DCF
@@ -105,14 +106,14 @@ def compute_confusion_matrix(pred_vec, L):
     return conf_matrix
 
 
-def compute_actual_DCF(pi, C_fn, C_fp, llr_vec, L):
-    DCF_u = compute_DCF_u(pi, C_fn, C_fp, llr_vec, L)
-    DCF_den = compute_den_normalized_DCF(pi, C_fn, C_fp, llr_vec, L)
+def compute_actual_DCF(pi, C_fn, C_fp, llr_vec, L, t):
+    DCF_u = compute_DCF_u(pi, C_fn, C_fp, llr_vec, L, t)
+    DCF_den = compute_den_normalized_DCF(pi, C_fn, C_fp, llr_vec, L, t)
     DCF = DCF_u/DCF_den
     # round DFU
     actDCF = float(int(DCF*1000))/1000
     
-    return DCF
+    return actDCF
 
 
 def compute_min_DCF(pi, C_fn, C_fp, llr, L, t_vec): 
